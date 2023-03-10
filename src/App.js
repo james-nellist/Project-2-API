@@ -1,28 +1,15 @@
-import { useEffect } from 'react'
-import axios from 'axios'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Home from './Home.js'
-import SearchBar from './SearchBar.js'
 
 const App = () => {
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const response = await axios.get('/v1/forecast.json?key=5f88f3477596486b8d1103719230903&q=London&days=7') // * <-- replace with your endpoint
-        console.log(response)
-      } catch (error) {
-        console.log(error)
 
-      }
-    }
-    getData()
-  }, [])
+  console.log(process.env.REACT_APP_API_KEY)
 
+  
   return (
     <div className='site-wrapper'>
       <BrowserRouter>
         <Routes>
-          <Route path="/Search.js" element={<SearchBar />} />
           <Route path="/" element={<Home />} />
         </Routes>
       </BrowserRouter>
@@ -31,6 +18,7 @@ const App = () => {
 }
 
 export default App
+
 // Pseudocode
 
 // downloads - axios, bootstrap, react-router-dom, useNavigate

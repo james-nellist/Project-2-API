@@ -10,55 +10,83 @@ import SearchBar from './SearchBar.js'
 const Home = () => {
 
   const [weatherData, setWeatherData] = useState(null)
+  const [searchCity, setSearchCity] = useState('')
 
   useEffect(() => {
     const getData = async () => {
-      
-      const response = await axios.get('/v1/forecast.json?key=5f88f3477596486b8d1103719230903&q=Los_Angeles&days=7') // * <-- replace with your endpoint
-      // console.log(response.data)
-      setWeatherData(response.data)
+
+      try {
+        const response = await axios.get(`/v1/forecast.json?key=${process.env.REACT_APP_API_KEY}&q=London&days=7`)
+        console.log(response.data)
+        setWeatherData(response.data)
+        
+      } catch (error) {
+        console.log(error)
+      }
     }
     getData()
   }, [])
 
-  const handleSearch = (searchedCity) => {
-    setWeatherData(searchedCity)
+  const handleSearch = (searchCity) => {
+    setWeatherData(searchCity)
+    console.log(searchCity)
   }
 
-  const hourOfDay = weatherData?.forecast.forecastday[0].hour
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    setWeatherData(searchCity)
+    console.log('submitted', searchCity)
+  }
+
+  const hourOfDay = weatherData?.forecast?.forecastday[0].hour
   console.log(hourOfDay)
+
+  useEffect(() => {
+    const getCity = async () => {
+      try {
+        const searchResponse = await axios.get(`/v1/forecast.json?key=${process.env.REACT_APP_API_KEY}&q=${searchCity}&days=7`)
+        setWeatherData(searchResponse.data)
+        console.log('search log', searchResponse.data)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    getCity()
+  }, [searchCity])
 
   return (
     <main>
       <Container>
         <Row>
-          <h1>Daily Forecast</h1>
-          <p>{weatherData ?
-            weatherData.location.name : ''}</p>
-              <SearchBar onSearch={handleSearch} />
-          <div className='forcastContainer'>
+          <h1>{weatherData ?
+            weatherData.location.name : ''}</h1>
+          <img src={weatherData ? weatherData.current.condition.icon : ''} alt="weather icon" />
+          <h2>
+            {weatherData ?
+              weatherData.current.condition.text : ''}
+          </h2>
+          <div className='forecastContainer'>
             <Col>
-              <p>{weatherData ?
-                weatherData.current.condition.text : ''}</p>
-
-              {/* <img src={png} alt={"weather icon"} {weatherData ?
-                weatherData.current.condition.icon : ''}></img> */}
-
-              <p> Chance of Rain {weatherData ?
-                weatherData.forecast.forecastday[0].day.daily_chance_of_rain : ''}%</p>
-              <img src={weatherData ? weatherData.current.condition.icon : ''} alt="weather icon" />
-              <p>Current temp {weatherData ?
-                weatherData.current.temp_c : ''}°C</p>
-              <p>Maximum temp {weatherData ?
-                weatherData.forecast.forecastday[0].day.maxtemp_c : ''}°C  Minimum temp {weatherData ?
-                  weatherData.forecast.forecastday[0].day.mintemp_c : ''}°C </p>
-              <img src={weatherData ? weatherData.forecast.forecastday[0].hour[2].condition.icon : ''} alt="weather icon" />
-              {weatherData &&
-                weatherData.forecast.forecastday[0].hour.filter((hour, i) => (i <= 24 && i % 3 === 0) || i === 23)
-                  .map(hour => {
-                    return <p key={hour} value={hour.temp_c}>{hour.time.slice(10)} - {hour.temp_c}°C</p>
-                  })}
-
+              <SearchBar onSearch={handleSearch} setSearchCity={setSearchCity} searchCity={searchCity} onSubmit={handleSubmit} />
+              <div className='current-data'>
+                <p className="daily">Daily Forecast</p>
+                <p> Chance of Rain <span><strong>{weatherData && weatherData.forecast ?
+                  weatherData.forecast.forecastday[0].day.daily_chance_of_rain : ''}%</strong></span></p>
+                <p>Current temp <span><strong>{weatherData && weatherData.forecast ?
+                  weatherData.current.temp_c : ''}°C</strong></span></p>
+                <p>Maximum temp <span><strong>{weatherData && weatherData.forecast ?
+                  weatherData.forecast.forecastday[0].day.maxtemp_c : ''}°C</strong></span> -- Minimum temp <span><strong>{weatherData ?
+                    weatherData.forecast.forecastday[0].day.mintemp_c : ''}°C</strong></span></p>
+              </div>
+              <div className="hourlyContainer">
+                {weatherData && weatherData.forecast && 
+                  weatherData.forecast.forecastday[0].hour.filter((hour, i) => (i <= 24 && i % 3 === 0) || i === 23)
+                    .map((hour, i) => {
+                      return <div className="hour-data">
+                        <p key={hour} value={hour.temp_c}>{hour.time.slice(10)}: {hour.temp_c}°C</p>
+                        <img key={i} value={hour.condition.icon} src={weatherData ? weatherData.forecast.forecastday[0].hour[i].condition.icon : ''} alt="weather icon" />
+                      </div>
+                    })}</div>
             </Col>
           </div>
         </Row>
