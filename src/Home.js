@@ -16,12 +16,12 @@ const Home = () => {
     const getData = async () => {
 
       try {
-        const response = await axios.get(`/v1/forecast.json?key=${process.env.REACT_APP_API_KEY}&q=London&days=7`)
+        const response = await axios.get(`https://api.weatherapi.com/v1/forecast.json?key=${process.env.REACT_APP_API_KEY}&q=London&days=7`)
         console.log(response.data)
         setWeatherData(response.data)
         
       } catch (error) {
-        console.log(error)
+        console.log(error.message)
       }
     }
     getData()
@@ -44,7 +44,7 @@ const Home = () => {
   useEffect(() => {
     const getCity = async () => {
       try {
-        const searchResponse = await axios.get(`/v1/forecast.json?key=${process.env.REACT_APP_API_KEY}&q=${searchCity}&days=7`)
+        const searchResponse = await axios.get(`https://api.weatherapi.com/v1/forecast.json?key=${process.env.REACT_APP_API_KEY}&q=${searchCity}&days=7`)
         setWeatherData(searchResponse.data)
         console.log('search log', searchResponse.data)
       } catch (error) {
